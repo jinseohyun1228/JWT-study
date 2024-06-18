@@ -1,16 +1,14 @@
 package com.jwt.jwtstudy_youtube.service;
 
 
-import com.jwt.jwtstudy_youtube.dto.CstomUserDetails;
+import com.jwt.jwtstudy_youtube.dto.CustomUserDetails;
 import com.jwt.jwtstudy_youtube.entity.UserEntity;
 import com.jwt.jwtstudy_youtube.repository.UserRepository;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -43,7 +41,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         UserEntity userData = userRepository.findByUsername(username);
         if (userData != null) {
-            return new CstomUserDetails(userData);
+            return new CustomUserDetails(userData);
         }
         return null;
     }
