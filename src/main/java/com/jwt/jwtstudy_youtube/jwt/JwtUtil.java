@@ -14,12 +14,11 @@ public class JwtUtil {
 
     private SecretKey secretKey;
 
-    //생성자
-    public JwtUtil(@Value("${spring.jwt.secret}") String secret) {
+    public JwtUtil(@Value("${spring.jwt.secret}") String secret) { //보안을 위해서
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    //코튼 만들기
+    //토튼 만들기
     public String createJwt(String username, String role, Long expiredMs) {
 
         return Jwts.builder()
@@ -30,31 +29,32 @@ public class JwtUtil {
                 .signWith(secretKey) // 시그니처~!
                 .compact();
     }
-    //검증 진행
-    public String getUsername(String token) {
+    public String getUsername(String token) { // 토큰 검사와 유저네임 추출
 
         return Jwts.parser()
-                .verifyWith(secretKey)
+                .verifyWith(secretKey) //토큰 변조여부등 검사
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("username", String.class);
     }
 
-    public String getRole(String token) {
+    public String getRole(String token) { // 토큰 검사와 권한 추출
 
         return Jwts.parser()
-                .verifyWith(secretKey)
+                .verifyWith(secretKey) //토큰 변조여부등 검사
                 .build()
                 .parseSignedClaims(token)
                 .getPayload().get("role", String.class);
     }
 
-    //아직 유효한지
-
-    public Boolean isExpired(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+    public Boolean isExpired(String token) { // 토큰 검사와 유효성 검사
+        return Jwts.parser()
+                .verifyWith(secretKey) //토큰 변조여부등 검사
+                .build()
+                .parseSignedClaims(token)
+                .getPayload().getExpiration()
+                .before(new Date());
     }
 
 }
