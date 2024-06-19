@@ -1,5 +1,7 @@
 package com.jwt.jwtstudy_youtube.config;
 
+import com.jwt.jwtstudy_youtube.jwt.JwtFilter;
+import com.jwt.jwtstudy_youtube.jwt.JwtUtil;
 import com.jwt.jwtstudy_youtube.jwt.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,16 +13,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity //security를 위한 것이라고 알려주는 기능
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtUtil jwtUtil;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil) {
         this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
     }
 
     @Bean
@@ -31,6 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
         return configuration.getAuthenticationManager();
     }
 
@@ -53,15 +57,12 @@ public class SecurityConfig {
 
 
         //jwt로그인을 위한 필터등록
-        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
-        /*
-        * LogoutFilter는 인자가 필요~!~!
-        * 따라서 AuthenticationManager을 빈으로 등록해야한다.
-        */
+        http
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        /*
-        * authenticationManager도 인자가 필요하다.
-        */
+        http
+                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
+
         return http.build();
     }
 }
